@@ -1,0 +1,173 @@
+# Blog Application API Guide
+
+Base URL: `http://localhost:3030`
+
+---
+
+## 1. User Authentication Endpoints
+
+### 1.1 Sign Up
+Register a new user in the system.
+
+- **URL**: `/api/signup`
+- **Method**: `POST`
+- **Headers**: 
+  - `Content-Type: application/json`
+- **Request Body**:
+  ```json
+  {
+    "name": "John Doe",
+    "phone": "1234567890",
+    "email": "john@example.com",
+    "password": "securepassword123"
+  }
+  ```
+- **Responses**:
+  - **Success (200 OK)**:
+    ```json
+    { "status": "success" }
+    ```
+  - **Email Already Registered (200 OK)**:
+    ```json
+    { "status": "email already exists" }
+    ```
+  - **Error (500 Internal Server Error)**:
+    ```json
+    { "status": "error" }
+    ```
+
+### 1.2 Sign In
+Authenticate an existing user and retrieve a JWT session token.
+
+- **URL**: `/api/signin`
+- **Method**: `POST`
+- **Headers**: 
+  - `Content-Type: application/json`
+- **Request Body**:
+  ```json
+  {
+    "email": "john@example.com",
+    "password": "securepassword123"
+  }
+  ```
+- **Responses**:
+  - **Success (200 OK)**:
+    ```json
+    {
+      "status": "success",
+      "token": "eyJhbGciOi...",
+      "userId": "60d5ec49..."
+    }
+    ```
+  - **Invalid Email (200 OK)**:
+    ```json
+    { "status": "invalid email id" }
+    ```
+  - **Incorrect Password (200 OK)**:
+    ```json
+    { "status": "incorrect password" }
+    ```
+  - **Error (500 Internal Server Error)**:
+    ```json
+    { "status": "error" }
+    ```
+
+---
+
+## 2. Post / Content Endpoints
+All post endpoints require authentication. Provide the JWT token returned from signin inside the request headers.
+
+### 2.1 Create Post
+Create a new blog post entry.
+
+- **URL**: `/api/create-post`
+- **Method**: `POST`
+- **Headers**: 
+  - `Content-Type: application/json`
+  - `token`: `YOUR_JWT_TOKEN`
+- **Request Body**:
+  ```json
+  {
+    "userId": "60d5ec49...",
+    "message": "This is a new blog post entry."
+  }
+  ```
+- **Responses**:
+  - **Success (200 OK)**:
+    ```json
+    { "status": "success" }
+    ```
+  - **Unauthorized (200 OK)**:
+    ```json
+    { "status": "invalid authentication" }
+    ```
+  - **Error (200 OK)**:
+    ```json
+    { "status": "error" }
+    ```
+
+### 2.2 View All Posts
+Retrieve all posts registered in the application.
+
+- **URL**: `/api/view-all`
+- **Method**: `POST`
+- **Headers**: 
+  - `token`: `YOUR_JWT_TOKEN`
+- **Request Body**: `{}` (Empty JSON object)
+- **Responses**:
+  - **Success (200 OK)**:
+    ```json
+    [
+      {
+        "_id": "60d5ec8a...",
+        "userId": "60d5ec49...",
+        "message": "This is a new blog post entry.",
+        "postedOn": "2026-07-15T18:00:00.000Z",
+        "__v": 0
+      }
+    ]
+    ```
+  - **Unauthorized (200 OK)**:
+    ```json
+    { "status": "invalid authentication" }
+    ```
+  - **Error (200 OK)**:
+    ```json
+    { "status": "error" }
+    ```
+
+### 2.3 View My Posts
+Retrieve posts created by a specific user.
+
+- **URL**: `/api/view-my-posts`
+- **Method**: `POST`
+- **Headers**: 
+  - `Content-Type: application/json`
+  - `token`: `YOUR_JWT_TOKEN`
+- **Request Body**:
+  ```json
+  {
+    "userId": "60d5ec49..."
+  }
+  ```
+- **Responses**:
+  - **Success (200 OK)**:
+    ```json
+    [
+      {
+        "_id": "60d5ec8a...",
+        "userId": "60d5ec49...",
+        "message": "This is a new blog post entry.",
+        "postedOn": "2026-07-15T18:00:00.000Z",
+        "__v": 0
+      }
+    ]
+    ```
+  - **Unauthorized (200 OK)**:
+    ```json
+    { "status": "invalid authentication" }
+    ```
+  - **Error (200 OK)**:
+    ```json
+    { "status": "error" }
+    ```
