@@ -4,6 +4,7 @@ const cors = require('cors');
 const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
 const User = require('./models/User');
+const Post = require('./models/Post');
 
 const app = express();
 
@@ -49,6 +50,51 @@ app.post('/api/signin', async (req, res) => {
     } catch (error) {
         res.status(500).json({ status: "error" });
     }
+});
+
+app.post('/api/create-post', async (req, res) => {
+    const token = req.headers['token'];
+    if (!token) return res.json({ status: "invalid authentication" });
+    jwt.verify(token, 'blogAppSecretKeyKey', async (err, decoded) => {
+        if (err || !decoded) return res.json({ status: "invalid authentication" });
+        try {
+            const { userId, message } = req.body;
+            const newPost = new Post({ userId, message });
+            await newPost.save();
+            res.json({ status: "success" });
+        } catch (error) {
+            res.json({ status: "error" });
+        }
+    });
+});
+
+app.post('/api/view-all', async (req, res) => {
+    const token = req.headers['token'];
+    if (!token) return res.json({ status: "invalid authentication" });
+    jwt.verify(token, 'blogAppSecretKeyKey', async (err, decoded) => {
+        if (err || !decoded) return res.json({ status: "invalid authentication" });
+        try {
+            const allPosts = await Post.find({});
+            res.json(allPosts);
+        } catch (error) {
+            res.json({ status: "error" });
+        }
+    });
+});
+
+app.post('/api/view-my-posts', async (req, res) => {
+    const token = req.headers['token'];
+    if (!token) return res.json({ status: "invalid authentication" });
+    jwt.verify(token, 'blogAppSecretKeyKey', async (err, decoded) => {
+        if (err || !decoded) return res.json({ status: "invalid authentication" });
+        try {
+            const { userId } = req.body;
+            const individualPosts = await Post.find({ userId });
+            res.json(individualPosts);
+        } catch (error) {
+            res.json({ status: "error" });
+        }
+    });
 });
 
 const PORT = 3030;
